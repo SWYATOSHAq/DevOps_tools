@@ -1,0 +1,5 @@
+certs/*.pem
+certs/*.csr
+__pycache__
+*.log
+.venv
