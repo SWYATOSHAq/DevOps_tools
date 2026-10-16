@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>DevOps Tools — gRPC Dice</title>
+<style>body{font:20px system-ui;max-width:900px;margin:60px auto;color:#172b4d;background:#f3f6fa}h1{font-size:32px}section{display:flex;gap:24px}article{background:white;padding:30px;border-radius:16px;flex:1}strong{display:block;font-size:86px}small{color:#506580}button{padding:15px 28px;font-size:20px;background:#174bc6;color:white;border:0;border-radius:8px;margin-top:25px}.error{color:#b22}@media(max-width:650px){body{margin:24px;font-size:16px}h1{font-size:26px}section{gap:12px}article{padding:16px;min-width:0}strong{font-size:64px}small{font-size:12px}}</style></head>
+<body><p>Инструменты Девопс · Практическая работа №4</p><h1>Python → Go через gRPC</h1>
+<p>Два маршрута с взаимной проверкой сертификатов mTLS</p><section>
+<article><small>Прямое соединение · :8443</small><strong>{{ icon_a }}</strong>Результат: {{ a }}</article>
+<article><small>Через nginx · :9448 → :50051</small><strong>{{ icon_b }}</strong>Результат: {{ b }}</article>
+</section><p>Сравнение: {{ a }} {{ sign }} {{ b }}</p>
+<form method="post">{% csrf_token %}<button type="submit">Бросить кубики</button></form>
+{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
+<p><small>Django · Protocol Buffers · Go · nginx · Ubuntu 24.04</small></p></body></html>

@@ -10,11 +10,39 @@ jobs:
   repository-checks:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Validate repository
         run: python tools/check_repository.py
       - name: Run tests
         run: python -m unittest discover -s tests -v
+  grpc-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build Ubuntu lab
+        run: docker build -t devops-lab python_go_grpc
+      - name: Start services
+        run: |
+          docker run -d --name devops-lab -p 127.0.0.1:8000:8000 devops-lab
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8000/ > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker logs devops-lab
+          exit 1
+      - name: Check Django and Go
+        run: |
+          docker exec devops-lab python manage.py check
+          docker exec devops-lab go test ./server/...
+      - name: Check mTLS, nginx and three clients
+        run: docker exec devops-lab python -m scripts.verify
+      - name: Show service logs
+        if: always()
+        run: docker logs devops-lab
+      - name: Stop lab
+        if: always()
+        run: docker rm -f devops-lab

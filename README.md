@@ -15,3 +15,8 @@ pull request. GitHub Actions проверяет локальные изобра�
 python3 tools/check_repository.py
 python3 -m unittest discover -s tests -v
 ```
+
+## Практическая работа №4
+
+[Python и Go через gRPC, mTLS и nginx](python_go_grpc/README.md).
+Запуск Linux-окружения: `cd python_go_grpc && docker compose up --build -d`.
