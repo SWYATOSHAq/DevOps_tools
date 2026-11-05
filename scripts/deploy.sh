@@ -53,7 +53,7 @@ if "$DRY_RUN"; then
 fi
 
 if ! curl --fail --silent --show-error \
-    --connect-timeout 5 --max-time 20 \
+    --connect-timeout 10 --max-time 20 \
     --cacert "$CA_CERT" \
     --output /dev/null "$SITE_URL"; then
     die "После синхронизации сайт недоступен по HTTPS"
