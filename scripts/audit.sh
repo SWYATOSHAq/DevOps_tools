@@ -50,5 +50,30 @@ awk -F: '$3>=1000 && $3<65534 {
     printf "  %s (uid=%s)\n", $1, $3
 }' /etc/passwd
 
+echo "[4] Веб-сервер"
+check "Nginx активен" active "$(systemctl is-active nginx)"
+
+nginx_status=0
+sudo nginx -t || nginx_status=$?
+check "Конфигурация Nginx корректна" 0 "$nginx_status"
+
+cert_min_validity=${CERT_MIN_VALIDITY_SECONDS:-2592000}
+cert_status=0
+if [[ "$cert_min_validity" =~ ^[0-9]+$ ]]; then
+    openssl x509 -in /etc/ssl/certs/devops.crt -noout \
+        -checkend "$cert_min_validity" || cert_status=$?
+else
+    cert_status="некорректный порог"
+fi
+check "Сертификат действителен ещё $cert_min_validity с" 0 "$cert_status"
+
+if writable_paths=$(sudo find /var/www/devops-site -perm -o+w -print) &&
+    key_mode=$(sudo stat -c '%a' /etc/ssl/private/devops.key); then
+    permissions_result="${key_mode}${writable_paths:+, запись для всех: $writable_paths}"
+else
+    permissions_result="не удалось проверить права"
+fi
+check "Ключ имеет права 600, в каталоге нет записи для всех" 600 "$permissions_result"
+
 echo "Пройдено: $PASS, не пройдено: $FAIL"
 [[ "$FAIL" -eq 0 ]]
