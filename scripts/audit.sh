@@ -75,5 +75,24 @@ else
 fi
 check "Ключ имеет права 600, в каталоге нет записи для всех" 600 "$permissions_result"
 
+echo "[5] Контейнеризация"
+check "Docker активен" active "$(systemctl is-active docker)"
+check "Контейнер PostgreSQL готов" healthy \
+    "$(docker inspect -f '{{.State.Health.Status}}' app-db-1 2>/dev/null || echo 'недоступен')"
+
+if listeners=$(ss -Hltn '( sport = :5000 or sport = :5432 )'); then
+    port_result=$(awk '
+        $4 != "127.0.0.1:5000" { print $4 }
+    ' <<< "$listeners")
+    port_result=${port_result:-ok}
+else
+    port_result="не удалось проверить сокеты"
+fi
+check "Порт 5000 доступен только на 127.0.0.1, порт 5432 не опубликован" \
+    ok "$port_result"
+
+check "Файл ~/app/.env имеет права 600" 600 \
+    "$(stat -c '%a' "$HOME/app/.env" 2>/dev/null || echo 'недоступен')"
+
 echo "Пройдено: $PASS, не пройдено: $FAIL"
 [[ "$FAIL" -eq 0 ]]

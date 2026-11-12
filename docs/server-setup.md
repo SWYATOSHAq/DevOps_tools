@@ -303,3 +303,31 @@ sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 
 Инструкция восстановления составлена по выполненным действиям.
 Полный повторный откат и восстановление по ней пока не проводились.
+
+## 9. Контейнеризация
+
+Docker Engine 29.9.3 и Docker Compose 5.7.1 установлены на Ubuntu VM
+из официального APT-репозитория Docker. Пользователь `devops` входит
+в группу `docker` и запускает контейнеры без `sudo`.
+
+Проект Compose находится в `/home/devops/app`. Файл `.env` создаётся
+на VM, имеет права `600` и содержит пароль PostgreSQL. Шаблон переменных
+хранится в `app/.env.example`.
+
+Flask и PostgreSQL работают в сети `app_backend`. Приложение обращается
+к PostgreSQL по имени `db`. Порт Flask опубликован только на
+`127.0.0.1:5000`, порт PostgreSQL на VM не опубликован.
+Данные PostgreSQL хранятся в именованном томе `app_db_data`.
+
+В HTTPS-блоке `/etc/nginx/sites-available/devops-site` маршрут `/app/`
+проксируется на `http://127.0.0.1:5000/`. Завершающий `/` в `proxy_pass`
+убирает префикс `/app/` при передаче запроса. Статическая страница
+обслуживается по `/`. После изменения конфигурации выполни
+`sudo nginx -t && sudo systemctl reload nginx`.
+
+На этой VM базовый образ Python и образ PostgreSQL были переданы с Mac
+через `docker save` и `docker load` из-за тайм-аута Docker Hub. После
+тайм-аута PyPI зависимости были скачаны на Mac для Linux ARM64 и
+переданы на VM в `~/pr7-wheels` для локальной установки при сборке.
+Готовые образы запускаются из `~/app` командой
+`docker compose up -d --no-build --pull never --wait`.
