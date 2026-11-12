@@ -9,3 +9,5 @@ python_go_grpc/certs/*.pem
 python_go_grpc/certs/*.csr
 python_go_grpc/.tools/
 python_go_grpc/server/dice-server
+
+.env
